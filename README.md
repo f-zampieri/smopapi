@@ -5,11 +5,15 @@ Welcome to the API! Below is some info on what I plan on using:
 * html
 * css
 * js
-* node.js
+* python (maybe)
+* node
 * express (no pug, but see below on how to make a page)
 * bootstrap
 * jquery
-* angular.js --> maybe
+* mongodb
+* mongoose
+* jsonwebtoken
+* nodemon
 
 ##Some Helpful Resources 
 * http://justbuildsomething.com/node-js-best-practices/#3
@@ -25,5 +29,7 @@ Welcome to the API! Below is some info on what I plan on using:
 * headers should not include anything that can be seen by the user
 
 ##JS Etiquette
-* Since express is awesome, we probably don't have to write much node stuff for now
 * **no javascripts in html documents,** *they belong in .js documents in the /public/javascripts folder and are to be linked via* \<script src="/public/javascripts/mysource.js">\</script>
+
+##API Etiquette 
+* **never call localhost:3001/api/... from outside of api**, make a function in the API to do so
