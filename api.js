@@ -26,7 +26,7 @@ app.use(morgan('dev'));
 // routes ================
 // =======================
 // create user
-app.get('/setup', function (req, res) {
+app.get('/newuser', function (req, res) {
 	// create a sample user
 	var nick = new User({
 		name: req.body.name
