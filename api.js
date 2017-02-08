@@ -3,6 +3,7 @@
 // =======================
 var express = require('express');
 var app = express();
+var crypto = require('crypto');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
@@ -26,11 +27,12 @@ app.use(morgan('dev'));
 // routes ================
 // =======================
 // create user
-app.get('/newuser', function (req, res) {
+app.post('/newuser', function (req, res) {
 	// create a sample user
 	var nick = new User({
 		name: req.body.name
 		, password: req.body.password
+		, salt: req.body.salt
 		, admin: req.body.admin
 	});
 	// save the sample user
@@ -77,7 +79,10 @@ apiRoutes.post('/authenticate', function (req, res) {
 		}
 		else if (user) {
 			// check if password matches
-			if (user.password != req.body.password) {
+			var hash = crypto.createHmac('sha512', user.salt);
+			hash.update(req.body.password);
+			var value = hash.digest('hex');
+			if (user.password != value) {
 				res.json({
 					success: false
 					, message: 'Authentication failed. Wrong password.'
@@ -131,6 +136,10 @@ apiRoutes.use(function (req, res, next) {
 });
 // apply the routes to our application with the prefix /api
 app.use('/api', apiRoutes);
+app.on('uncaughtException', function (err) {
+	console.error(err);
+	console.log("Node NOT Exiting...");
+});
 // start the server ======
 // =======================
 app.listen(port);
