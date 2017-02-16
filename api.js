@@ -9,11 +9,13 @@ var morgan = require('morgan');
 var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
-var User = require('./api/models/user'); // get our mongoose model
+var User = require('./api/models/user'); // get mongoose model
+var UserInfo = require('./api/models/userinfo'); // get mongoose model
 // =======================
 // configuration =========
 // =======================
 var port = process.env.PORT || 3001; // used to create, sign, and verify tokens
+mongoose.Promise = require('bluebird');
 mongoose.connect(config.database_dev); // connect to database
 app.set('superSecret', config.secret); // secret variable
 // use body parser so we can get info from POST and/or URL parameters
@@ -35,12 +37,19 @@ app.post('/newuser', function (req, res) {
 		, salt: req.body.salt
 		, admin: req.body.admin
 	});
+	var data = new UserInfo({
+		name: req.body.name
+		, info: {}
+	});
 	// save the sample user
 	nick.save(function (err) {
 		if (err) throw err;
-		console.log('User saved successfully');
-		res.json({
-			success: true
+		data.save(function (err) {
+			if (err) throw err;
+			console.log('User saved successfully');
+			res.json({
+				success: true
+			});
 		});
 	});
 });
@@ -55,10 +64,46 @@ apiRoutes.get('/', function (req, res) {
 		message: 'Welcome to the smop. API.'
 	});
 });
+apiRoutes.get('/checkToken', function (req, res) {
+	res.json({
+		success: true
+	});
+});
 // route to return all users (GET http://localhost:8080/api/users)
 apiRoutes.get('/users', function (req, res) {
 	User.find({}, function (err, users) {
 		res.json(users);
+	});
+});
+// route to get user info
+apiRoutes.get('/get_info', function (req, res) {
+	var name = req.body.name || req.query.name || req.headers['x-access-name'];
+	UserInfo.findOne({
+		name: name
+	}, function (err, object) {
+		if (err) throw err;
+		if (!object) {
+			res.json({
+				success: false
+				, message: 'User not found'
+			});
+		}
+		else if (object) {
+			if (object.info) {
+				res.json({
+					success: true
+					, message: 'info acquired'
+					, info: object.info
+				});
+			}
+			else if (!object.info) {
+				res.json({
+					success: true
+					, message: 'no info found'
+					, info: '//this is where you edit your info'
+				});
+			}
+		}
 	});
 });
 // =======================
