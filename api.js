@@ -75,6 +75,21 @@ apiRoutes.get('/users', function (req, res) {
 		res.json(users);
 	});
 });
+// route to parse and check code for standard issues
+apiRoutes.get('/get_codeCheck', function (req, res) {
+	var spawn = require('child_process').spawn
+		, py = spawn('python', ['pythonBackend.py'])
+		, data = req.body.code
+		, dataString = '';
+	py.stdout.on('data', function (data) {
+		dataString += data.toString();
+	});
+	py.stdout.on('end', function () {
+		console.log('Sum of numbers=', dataString);
+	});
+	py.stdin.write(JSON.stringify(data));
+	py.stdin.end();
+});
 // route to get user info
 apiRoutes.get('/get_info', function (req, res) {
 	var name = req.body.name || req.query.name || req.headers['x-access-name'];
