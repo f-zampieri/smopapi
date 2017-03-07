@@ -20,7 +20,7 @@ Welcome to the API! Below is some info on what I plan on using:
 * https://zellwk.com/blog/crud-express-mongodb/
 * https://scotch.io/tutorials/authenticate-a-node-js-api-with-json-web-tokens
 
-##General Etiquette (applicable on /all/ files
+##General Etiquette (applicable on *all* files)
 * Use Beautify.io to get the right styling. I use Brackets which has a plugin for it
 
 ##html/Pug Etiquette (aka how to make a page)
