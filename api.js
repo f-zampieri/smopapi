@@ -69,14 +69,8 @@ apiRoutes.get('/checkToken', function (req, res) {
 		success: true
 	});
 });
-// route to return all users (GET http://localhost:8080/api/users)
-apiRoutes.get('/users', function (req, res) {
-	User.find({}, function (err, users) {
-		res.json(users);
-	});
-});
 // route to parse and check code for standard issues
-apiRoutes.get('/get_codeCheck', function (req, res) {
+apiRoutes.post('/post_codeCheck', function (req, res) {
 	var spawn = require('child_process').spawn
 		, py = spawn('python', ['pythonBackend.py'])
 		, data = req.body.code
@@ -89,6 +83,9 @@ apiRoutes.get('/get_codeCheck', function (req, res) {
 	});
 	py.stdin.write(JSON.stringify(data));
 	py.stdin.end();
+	res.json({
+		success: true
+	});
 });
 // route to get user info
 apiRoutes.get('/get_info', function (req, res) {
