@@ -2,6 +2,7 @@
 // get the packages we need ============
 // =======================
 var express = require('express');
+var shell = require('python-shell');
 var app = express();
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
@@ -71,7 +72,7 @@ apiRoutes.get('/checkToken', function (req, res) {
 });
 // route to parse and check code for standard issues
 apiRoutes.post('/post_codeCheck', function (req, res) {
-	var spawn = require('child_process').spawn
+	/*var spawn = require('child_process').spawn
 		, py = spawn('python', ['pythonBackend.py'])
 		, data = req.body.code
 		, dataString = '';
@@ -83,8 +84,22 @@ apiRoutes.post('/post_codeCheck', function (req, res) {
 	});
 	py.stdin.write(JSON.stringify(data));
 	py.stdin.end();
-	res.json({
-		success: true
+	console.log('about to res ajs apijs');*/
+	var pyshell = new shell('pythonBackend.py');
+	// sends a message to the Python script via stdin
+	pyshell.send(req.body.code);
+	pyshell.on('message', function (message) {
+		// receives python print statement 
+		res.json({
+			success: message
+			, data: req.body.code
+		});
+		console.log(message);
+	});
+	// end the input stream and allow the process to exit
+	pyshell.end(function (err) {
+		if (err) throw err;
+		console.log('py is finished');
 	});
 });
 // route to get user info
