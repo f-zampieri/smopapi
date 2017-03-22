@@ -110,7 +110,7 @@ apiRoutes.post('/authenticate', function (req, res) {
 });
 // route middleware to verify a token
 apiRoutes.use(function (req, res, next) {
-	console.log('running middleware');
+	//console.log('running middleware');
 	// check header or url parameters or post parameters for token
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
 	// decode token
@@ -118,7 +118,7 @@ apiRoutes.use(function (req, res, next) {
 		// verifies secret and checks exp
 		jwt.verify(token, app.get('superSecret'), function (err, decoded) {
 			if (err) {
-				console.log('jwt not authenticated');
+				//console.log('jwt not authenticated');
 				return res.json({
 					success: false
 					, message: 'Failed to authenticate token.'
@@ -126,7 +126,7 @@ apiRoutes.use(function (req, res, next) {
 			}
 			else {
 				// if everything is good, save to request for use in other routes
-				console.log(jwt);
+				//console.log(jwt);
 				req.decoded = decoded;
 				next();
 			}
@@ -135,7 +135,7 @@ apiRoutes.use(function (req, res, next) {
 	else {
 		// if there is no token
 		// return an error
-		console.log('jwt not provided');
+		//console.log('jwt not provided');
 		return res.status(403).send({
 			success: false
 			, message: 'No token provided.'
