@@ -165,14 +165,16 @@ apiRoutes.post('/post_codeCheck', function (req, res) {
 	console.log('about to res ajs apijs');*/
 	var pyshell = new shell('pythonBackend.py');
 	// sends a message to the Python script via stdin
+	console.log(req.body.code);
 	pyshell.send(req.body.code);
 	pyshell.on('message', function (message) {
 		// receives python print statement 
+		message = JSON.parse(message);
+		console.log(message);
 		res.json({
-			success: message
+			success: message.success
 			, data: req.body.code
 		});
-		console.log(message);
 	});
 	// end the input stream and allow the process to exit
 	pyshell.end(function (err) {
@@ -215,7 +217,7 @@ apiRoutes.get('/get_info', function (req, res) {
 app.use('/api', apiRoutes);
 app.on('uncaughtException', function (err) {
 	console.error(err);
-	console.log("Node NOT Exiting...");
+	console.log("api Error, Node NOT Exiting...");
 });
 // start the server ======
 // =======================

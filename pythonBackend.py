@@ -1,23 +1,27 @@
 # for checking for compilation/syntax and some runtime errors
 # (c) Alex Shukhman 2/28/17
 
-import sys, json
+import sys
+try:
+	import simplejson as json
+except:
+	import json
 
 # Read
 def readIn():
     lines = sys.stdin.readlines()
     # multiple lines --> lines[all]=lines json.loads(lines) returns a 
-    return json.loads(lines)
+    return lines
 
 def main():
     # Read input
-    #lines = readIn()
+    lines = readIn()
 
     # Parse
     #parse_out = parseLines(lines)
 
     # Return Using Print
-    print(True)#parse_out)
+    print(json.dumps({'success':True, 'lines':lines}))
 
 
 # on call, start process
