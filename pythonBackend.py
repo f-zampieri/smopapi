@@ -9,9 +9,9 @@ except:
 
 # Read
 def readIn():
-    lines = sys.stdin.readlines()
+    lines = json.dumps(sys.stdin.readlines())
     # multiple lines --> lines[all]=lines json.loads(lines) returns a 
-    return lines
+    return json.loads(lines)
 
 def main():
     # Read input
