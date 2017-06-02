@@ -2,6 +2,7 @@
 # (c) Alex Shukhman 2/28/17
 
 import sys
+
 try:
 	import simplejson as json
 except:
@@ -16,14 +17,13 @@ def readIn():
 def main():
     # Read input
     lines = readIn()
-
+    #lines = "hello from the depths of the api"
     # Parse
     #parse_out = parseLines(lines)
 
     # Return Using Print
     print(json.dumps({'success':True, 'lines':lines}))
-
-
+	
 # on call, start process
 if __name__ == '__main__':
     main()
