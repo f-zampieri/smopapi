@@ -150,7 +150,7 @@ apiRoutes.post('/post_codeCheck', function (req, res) {
 	console.log('AJS api init codeCheck');
 	var pyshell = new shell('pythonBackend.py');
 	// sends a message to the Python script via stdin
-	console.log("AJS REQ CODE: " + req.body.code);
+	console.log("AJS REQ CODE:\n" + req.body.code);
 	pyshell.send(req.body.code);
 	pyshell.on('message', function (message) {
 		// receives python print statement 
