@@ -15,7 +15,7 @@ DigitalOcean Python Token:
 #############################################################
 
 # imports 
-import sys, time, subprocess, digitalocean
+import sys, time, subprocess, digitalocean, platform
 
 from digitalocean import SSHKey
 
@@ -29,10 +29,7 @@ except:
 global pytoken
 pytoken = 'b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d'
 global ssh_key
-ssh_key ={'id': 'pykey',
-          'fingerprint': '47:75:a3:5d:2c:e1:79:6b:29:61:33:a2:7d:4a:a9:50',
-          'public_key': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8D2gvpLO6aUsaaYyGGOqU4WaQ7qCx0X+AVv+1D6eJRaCZyG05QvN/Zaymb7Uf/VDngX+8BNZAJgGGkMTHRp86yeurNSlYc7K6bLNOsbyhj/Vht0NaWm9zHHXLS4FXj09d/js2YjAPZXFIp/at1y1o9LaG0C9uaorxT8AhaQWfKhl7FmZ6FQUg8ukTWcUBFXzXECHQch+VCEhi8v49J5fwTDiVxVZ44o0n79P7tN/qhMtDNSnucWIHVHPaHHcjZkpznKLimaY2m9pmOYfNEUQEIhAFflOPrbMyF4dsDdluuf5ii3RPnzc2oA/Cg6ZNboOfA5bBGdNQbmZboW8kzP0n alex.jacob.shukhman@gmail.com',
-          'name': 'pykey'}
+ssh_key ='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAIPY2/fM4To+t3NnyN18lrgdA//XMwh4oGWdhVw+cQiBOhZ0zlXRSkPCa+W3j0ORGNLfgIl0GTgOuMQOQLvEIyBuNlqEpWRQ2LfKuwJPs0Vo6blT+vVJl6vPHERA97Hoe4osN+DXFpzqdahLTWZEC37zy4bFySYwDLS+rhrS++Xo7cLB6q4+8I3n60/TcTN3uBh8AO0vRDA/8GEKqfc/jlXxg40o0/pmO7yYdSHqxDyDQibK2TSs7NUvuhxO5DT3IPR2EM7/lAIY5QRT902XcDt68BJ2M4JaqwSh5kl5b4AEQC8Hj7W2Dmes+Sq6Vby32VIDDsWUAGiKz6ycsjXx7 Dell User@ShukhmanPC'
 
 # Read
 def readIn():
@@ -59,10 +56,10 @@ def parseLines(lines):
 def spinupServer(token): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A PAID SERVICE, always close server when done
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
-                             region= 'nyc2',
+                             region= 'nyc1',
                              image= 'ubuntu-16-04-x32',
                              size_slug='512mb',
-                             ssh_keys = [ssh_key['public_key']],
+                             ssh_keys = [ssh_key],
                              backups=True)
     d.create()
     
@@ -82,10 +79,33 @@ def closeServer(d):
 def test():
     t0 = time.time()
     d = spinupServer("AJS")
+    runSetup(d.ip_address)
+    try:
+        raw_input('Press Enter')
+    except:
+        input('Press Enter')
+    timeAJS = time.time()-t0
     closeServer(d)
-    return time.time()-t0
+    return '$'+str(round(.007*timeAJS/60/60,2)) # how much cash you owe me
 
-#162.243.252.100
+def runSetup(ip):
+    linesserver = ['sudo apt-get update',
+               'sudo apt-get install nodejs',
+               'nodejs app1.js', 'read -p "Press enter to continue"']
+    linessh = ['ssh -i key '+ip+' "','"']
+    linessh = [linessh[0]+'; '.join(linesserver)+linessh[1]]
+    linesbat = ['bash -c "', '"']
+    if platform.system() == "Windows":
+        with open('jssetup.bat', 'w') as f:
+            linesbat = [linesbat[0]+'; '.join(linessh)+linesbat[1]] #requires win10 bash
+            f.writelines(linesbat)
+        subprocess.call(['./jssetup.bat'])
+    else:
+        with open('jssetup.sh', 'w') as f:
+            f.writelines(linessh)
+            f.writelines(linesserver)
+        subprocess.call(['./jssetup.sh'])
+    
 
 # on call, start process
 '''if __name__ == '__main__':
