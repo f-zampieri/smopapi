@@ -1,5 +1,5 @@
 # for checking for compilation/syntax and some runtime errors
-# (c) Alex Shukhman 2/28/17
+# (c) Alex Shukhman 03/24/17
 
 import sys
 try:
@@ -9,9 +9,9 @@ except:
 
 # Read
 def readIn():
-    lines = json.dumps(sys.stdin.readlines())
+    lines = sys.stdin.readlines()
     # multiple lines --> lines[all]=lines json.loads(lines) returns a 
-    return json.loads(lines)
+    return lines
 
 def main():
     # Read input

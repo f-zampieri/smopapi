@@ -150,30 +150,17 @@ apiRoutes.get('/checkToken', function (req, res) {
 });
 // route to parse and check code for standard issues
 apiRoutes.post('/post_codeCheck', function (req, res) {
-	/*var spawn = require('child_process').spawn
-		, py = spawn('python', ['pythonBackend.py'])
-		, data = req.body.code
-		, dataString = '';
-	py.stdout.on('data', function (data) {
-		dataString += data.toString();
-	});
-	py.stdout.on('end', function () {
-		console.log('Sum of numbers=', dataString);
-	});
-	py.stdin.write(JSON.stringify(data));
-	py.stdin.end();
-	console.log('about to res ajs apijs');*/
 	var pyshell = new shell('pythonBackend.py');
 	// sends a message to the Python script via stdin
-	console.log(req.body.code);
-	pyshell.send(req.body.code);
+	console.log(req.data);
+	pyshell.send(req.code);
 	pyshell.on('message', function (message) {
 		// receives python print statement 
 		message = JSON.parse(message);
 		console.log(message);
 		res.json({
 			success: message.success
-			, data: req.body.code
+			, data: req.code
 		});
 	});
 	// end the input stream and allow the process to exit
