@@ -57,9 +57,6 @@ app.post('/newuser', function (req, res) {
 // API ROUTES -------------------
 // apiRoutes are routes to helper functions /only/ do not call apiRoutes functions from outside the API
 var apiRoutes = express.Router();
-// TODO: route to authenticate a user (POST http://localhost:8080/api/authenticate)
-// TODO: route middleware to verify a token
-// route to show a random message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function (req, res) {
 	res.json({
 		message: 'Welcome to the smop. API.'
@@ -150,10 +147,11 @@ apiRoutes.get('/checkToken', function (req, res) {
 });
 // route to parse and check code for standard issues
 apiRoutes.post('/post_codeCheck', function (req, res) {
+	console.log('AJS api init codeCheck');
 	var pyshell = new shell('pythonBackend.py');
 	// sends a message to the Python script via stdin
-	console.log(req.data);
-	pyshell.send(req.code);
+	console.log("AJS REQ CODE:\n" + req.body.code);
+	pyshell.send(req.body.code);
 	pyshell.on('message', function (message) {
 		// receives python print statement 
 		message = JSON.parse(message);
