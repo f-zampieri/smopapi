@@ -7,10 +7,10 @@
 Variables:
     lines = list object
     line = string object
-
-Downloads:
-    pip install python-digitalocean
-    pip install paramiko
+    
+pip:
+    pip install -U python-digitalocean
+    pip install -U paramiko
 
 DigitalOcean Python Token:
     pyToken = b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d <- do not use without my permission
@@ -19,7 +19,7 @@ DigitalOcean Python Token:
 #############################################################
 
 # imports 
-import sys, time, subprocess, digitalocean, platform
+import os, sys, time, subprocess, platform, digitalocean, paramiko
 
 from digitalocean import SSHKey
 
@@ -32,8 +32,6 @@ except:
 
 global pytoken
 pytoken = 'b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d'
-global ssh_key
-ssh_key ='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAIPY2/fM4To+t3NnyN18lrgdA//XMwh4oGWdhVw+cQiBOhZ0zlXRSkPCa+W3j0ORGNLfgIl0GTgOuMQOQLvEIyBuNlqEpWRQ2LfKuwJPs0Vo6blT+vVJl6vPHERA97Hoe4osN+DXFpzqdahLTWZEC37zy4bFySYwDLS+rhrS++Xo7cLB6q4+8I3n60/TcTN3uBh8AO0vRDA/8GEKqfc/jlXxg40o0/pmO7yYdSHqxDyDQibK2TSs7NUvuhxO5DT3IPR2EM7/lAIY5QRT902XcDt68BJ2M4JaqwSh5kl5b4AEQC8Hj7W2Dmes+Sq6Vby32VIDDsWUAGiKz6ycsjXx7 Dell User@ShukhmanPC'
 
 # Read
 def readIn():
@@ -43,8 +41,6 @@ def readIn():
 def main():
     # Read input
     lines = readIn()
-
-    parse_out = parseLines(lines)
 
     # Return Using Print
     print(json.dumps({'success':True, 'lines':lines}))
@@ -57,13 +53,13 @@ def writeFile(lines):
 def parseLines(lines):
     writeFile(lines)
 	
-def spinupServer(token): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A PAID SERVICE, always close server when done
+def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A PAID SERVICE, always close server when done
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
                              region= 'nyc1',
                              image= 'ubuntu-16-04-x32',
                              size_slug='512mb',
-                             ssh_keys = [ssh_key],
+                             ssh_keys = [ssh_key.id],
                              backups=True)
     d.create()
     
@@ -81,9 +77,12 @@ def closeServer(d):
     return d.destroy()
 
 def test():
+    # ssh key create
+    ssh_key = digitalocean.Manager(token = pytoken).get_all_sshkeys()[0] # there should only be one
+    # get ready... get set... go!
     t0 = time.time()
-    d = spinupServer("AJS")
-    runSetup(d.ip_address)
+    d = spinupServer("AJS", ssh_key)
+    runSetup(d.ip_address, ssh_key)
     try:
         raw_input('Press Enter')
     except:
@@ -92,23 +91,23 @@ def test():
     closeServer(d)
     return '$'+str(round(.007*timeAJS/60/60,2)) # how much cash you owe me
 
-def runSetup(ip):
-    linesserver = ['sudo apt-get update',
-               'sudo apt-get install nodejs',
-               'nodejs app1.js', 'read -p "Press enter to continue"']
-    linessh = ['ssh -i key '+ip+' "','"']
-    linessh = [linessh[0]+'; '.join(linesserver)+linessh[1]]
-    linesbat = ['bash -c "', '"']
-    if platform.system() == "Windows":
-        with open('jssetup.bat', 'w') as f:
-            linesbat = [linesbat[0]+'; '.join(linessh)+linesbat[1]] #requires win10 bash
-            f.writelines(linesbat)
-        subprocess.call(['./jssetup.bat'])
-    else:
-        with open('jssetup.sh', 'w') as f:
-            f.writelines(linessh)
-            f.writelines(linesserver)
-        subprocess.call(['./jssetup.sh'])
+def runSetup(ip, ssh_key):
+    # connection setup
+    connection = paramiko.SSHClient()
+    connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    print('connecting...')
+    # connect
+    connection.connect( hostname=ip, username='root', key_filename='key' )
+    print('connected')
+
+    commands = ['jssetup.sh']
+    for command in commands:
+        print('executing '+ str(command))
+        stdin, stdout, stderr = connection.exec_command(command)
+        print (stdout.read())
+        print ("Errors")
+        print (stderr.read())
+    connection.close()
     
 
 # on call, start process

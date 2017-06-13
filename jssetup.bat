@@ -1,1 +1,0 @@
-bash -c "ssh -i key 67.207.92.15 "sudo apt-get update; sudo apt-get install nodejs; nodejs app1.js; read -p "Press enter to continue"""
