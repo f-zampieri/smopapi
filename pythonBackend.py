@@ -42,8 +42,6 @@ def main():
     # Read input
     lines = readIn()
 
-    parse_out = parseLines(lines)
-
     # Return Using Print
     print(json.dumps({'success':True, 'lines':lines}))
 
