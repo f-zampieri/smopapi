@@ -8,6 +8,10 @@ Variables:
     lines = list object
     line = string object
 
+Downloads:
+    pip install python-digitalocean
+    pip install paramiko
+
 DigitalOcean Python Token:
     pyToken = b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d <- do not use without my permission
 '''
