@@ -8,6 +8,7 @@
 '''
 
 Build 0.0.0
+
 Notes:
 
     Don't forget to pip install stuff.
@@ -17,14 +18,14 @@ Notes:
     That should be more than enough space.
 
     To work with setup files, use (js)setup.sh. <- will offer different setups per language
-    Do not do any setup directly with Python.
+    Do not do any setup directly with Python, only with shell scripts.
 
     To Test Setup:
         1. Create JS file
         2. Run in Terminal:
             - python (or python3)
             - from pythonBackend import *
-            - test('route/to/js/file.js') <- or just 'foo.js'
+            - test('route/to/file.js') <- or just 'foo.js'
 
     For Build 0.0.0:
 
@@ -34,7 +35,7 @@ Notes:
         Build Platforms:
             - .js: Nodejs JS Compiler
 
-pip:
+pip: <- if running python3, command is pip3, not pip
     pip install -U python-digitalocean
     pip install -U paramiko
     pip install -U pysendfile
