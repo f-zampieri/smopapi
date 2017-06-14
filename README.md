@@ -1,11 +1,16 @@
 #smop. API
 Welcome to the API! Below is some info on what I plan on using:
 
-##Lang/lib:
+##Lang/Lib:
 * html
 * css
 * js
-* python (maybe)
+* python (see note)
+  * digitalocean -- servers
+  * paramiko -- ssh
+  * pysendfile & socket -- ftp
+  * other: os, sys, time, subprocess
+  * pip -- installing libraries for use with python
 * node
 * express (no pug, but see below on how to make a page)
 * bootstrap
@@ -14,6 +19,7 @@ Welcome to the API! Below is some info on what I plan on using:
 * mongoose
 * jsonwebtoken
 * nodemon
+* bash
 
 ##Some Helpful Resources 
 * http://justbuildsomething.com/node-js-best-practices/#3
@@ -37,3 +43,6 @@ Welcome to the API! Below is some info on what I plan on using:
 
 ##API Etiquette 
 * **never call localhost:3001/api/... from outside of api**, make a function in the API to do so
+
+##Notes on Python:
+* **To use PythonBackend** - read file block comment for install instructions and version info
