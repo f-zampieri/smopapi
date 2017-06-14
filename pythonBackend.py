@@ -3,25 +3,55 @@
 
 #############################################################
 
+# Info
+
 '''
-Variables:
-    lines = list object
-    line = string object
+
+Build 0.0.0
+Notes:
+
+    Don't forget to pip install stuff.
+    This is the only not-automated step.
     
+    All servers run on ubuntu-16-04-x32 slug at a size of 512mb.
+    That should be more than enough space.
+
+    To work with setup files, use (js)setup.sh. <- will offer different setups per language
+    Do not do any setup directly with Python.
+
+    To Test Setup:
+        1. Create JS file
+        2. Run in Terminal:
+            - python (or python3)
+            - from pythonBackend import *
+            - test('route/to/js/file.js') <- or just 'foo.js'
+
+    For Build 0.0.0:
+
+        Languages Offered:
+            - Javascript
+            
+        Build Platforms:
+            - .js: Nodejs JS Compiler
+
 pip:
     pip install -U python-digitalocean
     pip install -U paramiko
+    pip install -U pysendfile
 
 DigitalOcean Python Token:
     pyToken = b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d <- do not use without my permission
+
 '''
 
 #############################################################
 
-# imports 
-import os, sys, time, subprocess, platform, digitalocean, paramiko
+# Imports
+
+import os, sys, time, subprocess, socket, platform, digitalocean, paramiko
 
 from digitalocean import SSHKey
+from sendfile import sendfile
 
 try:
     import simplejson as json
@@ -30,30 +60,93 @@ except:
 
 #############################################################
 
+# Globals (minimize use of globals)
+
 global pytoken
 pytoken = 'b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d'
 
-# Read
+#############################################################
+
+# Helper Functions
+
+# Destroy Server
+def closeServer(d):
+    return d.destroy()
+
+# Pre-Parsing
+def parseLines(lines):
+    writeFile(lines)
+    return
+
+# Read Input From NPM
 def readIn():
     lines = json.dumps(sys.stdin.readlines())
     return json.loads(lines)
 
-def main():
-    # Read input
-    lines = readIn()
+# Set Up Server and Run JS File
+def runSetup(ip, ssh_key, jsFilePath):
+    # connection setup
+    connection = paramiko.SSHClient()
+    connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    print('connecting...')
+    
+    # connect -- try a maximum of maxTries times
+    maxTries = 10 # hopfully doesn't take more than like 2 or 3
+    tries = 0
+    success = False
+    while maxTries>tries:
+        try:
+            tries += 1
+            print('Try ' + str(tries))
+            connection.connect(hostname=ip, username='root', key_filename='key')
+            success = True
+            break
+        except:
+            time.sleep(5) # give it a sec or two...
 
-    # Return Using Print
-    print(json.dumps({'success':True, 'lines':lines}))
+    # if it's just not working...        
+    if not success:
+        print('Failed to connect')
+        return
+    
+    print('connected')
 
-def writeFile(lines):
-    with open("foo.js", "w") as f:
-        for line in lines:
-            f.write(line)
+    # send all files including setup and run files
+    filelist = [jsFilePath, 'jssetup.sh']
+    for f in filelist:
+        try:
+            sendToIP(f, ip)
+        except Exception as e:
+            print('Error with sending file: ' + str(e))
+            return
 
-def parseLines(lines):
-    writeFile(lines)
-	
+    # setup and run on server
+    commands = ['./jssetup.sh']
+    for command in commands:
+        print('executing '+ str(command))
+        stdin, stdout, stderr = connection.exec_command(command)
+        print (stdout.read())
+        print ("Errors")
+        print (stderr.read())
+    connection.close()
+    return
+
+# FTP Local Files
+def sendToIP(filename, ip):
+    with open(filename, 'rb') as file:
+        blocksize = os.path.getsize(filename)
+        s = socket.socket()
+        s.connect((str(ip), 8021))
+        offset = 0
+        while True:
+            sent = sendfile(s.fileno(), file.fileno(), offset, blocksize)
+            if sent == 0:
+                return
+            offset+=sent
+            
+# Create Server
 def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A PAID SERVICE, always close server when done
+    # ask DigitalOcean.com to provision a server (d for droplet)
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
                              region= 'nyc1',
@@ -62,7 +155,8 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
                              ssh_keys = [ssh_key.id],
                              backups=True)
     d.create()
-    
+
+    # make sure the server is totally built
     while True:
         d.load()
         if d.ip_address!=None:
@@ -73,42 +167,44 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
             break
     return d
 
-def closeServer(d):
-    return d.destroy()
+# Write a File
+def writeFile(lines):
+    with open("foo.js", "w") as f:
+        for line in lines:
+            f.write(line)
+    return
 
-def test():
-    # ssh key create
+#############################################################
+
+# Run Functions 
+
+def test(jsFilePath):
+    # ssh key get -- the key will work with the local files, do /not/ make new ones (aka, no ssh-keygen)
     ssh_key = digitalocean.Manager(token = pytoken).get_all_sshkeys()[0] # there should only be one
-    # get ready... get set... go!
+
+    # provision server then set it up and run code
     t0 = time.time()
     d = spinupServer("AJS", ssh_key)
-    runSetup(d.ip_address, ssh_key)
+    runSetup(d.ip_address, ssh_key, jsFilePath)
     try:
-        raw_input('Press Enter')
+        raw_input('To close server press ENTER')
     except:
-        input('Press Enter')
+        input('To close server press ENTER')
     timeAJS = time.time()-t0
+
+    # destroy server and print operating cost (usually negligible)
     closeServer(d)
-    return '$'+str(round(.007*timeAJS/60/60,2)) # how much cash you owe me
-
-def runSetup(ip, ssh_key):
-    # connection setup
-    connection = paramiko.SSHClient()
-    connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    print('connecting...')
-    # connect
-    connection.connect( hostname=ip, username='root', key_filename='key' )
-    print('connected')
-
-    commands = ['./jssetup.sh']
-    for command in commands:
-        print('executing '+ str(command))
-        stdin, stdout, stderr = connection.exec_command(command)
-        print (stdout.read())
-        print ("Errors")
-        print (stderr.read())
-    connection.close()
+    print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
+    return #EOF
     
+def main():
+    # Read input
+    lines = readIn()
+
+    # Return Using Print
+    print(json.dumps({'success':True, 'lines':lines}))
+
+    return #EOF
 
 # on call, start process
 '''if __name__ == '__main__':
