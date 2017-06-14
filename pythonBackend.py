@@ -48,7 +48,7 @@ DigitalOcean Python Token:
 
 # Imports
 
-import os, sys, time, subprocess, socket, platform, digitalocean, paramiko
+import os, sys, time, subprocess, socket, digitalocean, paramiko
 
 from digitalocean import SSHKey
 from sendfile import sendfile
