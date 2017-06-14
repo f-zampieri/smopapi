@@ -9,7 +9,7 @@ Welcome to the API! Below is some info on what I plan on using:
   * digitalocean -- servers
   * paramiko -- ssh
   * pysendfile & socket -- ftp
-  * other: os, sys, time, subprocess
+  * other: os, sys, time, subprocess, JSON
   * pip -- installing libraries for use with python
 * node
 * express (no pug, but see below on how to make a page)
