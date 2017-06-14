@@ -100,7 +100,7 @@ def runSetup(ip, ssh_key):
     connection.connect( hostname=ip, username='root', key_filename='key' )
     print('connected')
 
-    commands = ['jssetup.sh']
+    commands = ['./jssetup.sh']
     for command in commands:
         print('executing '+ str(command))
         stdin, stdout, stderr = connection.exec_command(command)
