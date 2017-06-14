@@ -19,6 +19,8 @@ Notes:
 
     To work with setup files, use (js)setup.sh. <- will offer different setups per language
     Do not do any setup directly with Python, only with shell scripts.
+	
+	If using new libraries for import, update documentation accordingly.
 
     To Test Setup:
         1. Create JS file
@@ -28,10 +30,8 @@ Notes:
             - test('route/to/file.js') <- or just 'foo.js'
 
     For Build 0.0.0:
-
         Languages Offered:
-            - Javascript
-            
+            - Javascript  
         Build Platforms:
             - .js: Nodejs JS Compiler
 
