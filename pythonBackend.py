@@ -12,15 +12,15 @@ Build 0.0.0
 Notes:
 
     Don't forget to pip install stuff.
-    This is the only not-automated step.
+    This is the only not-automated step (everything else should work out the box).
     
     All servers run on ubuntu-16-04-x32 slug at a size of 512mb.
     That should be more than enough space.
 
     To work with setup files, use (js)setup.sh. <- will offer different setups per language
-    Do not do any setup directly with Python, only with shell scripts.
+    Do not do any server setup directly with Python, only with shell scripts.
 	
-	If using new libraries for import, update documentation accordingly.
+    If using new libraries for import, update documentation accordingly.
 
     To Test Setup:
         1. Create JS file
@@ -84,8 +84,6 @@ def parseLines(lines):
 
 # Checks if str is valid javascript file name
 def isjs(s):
-    print('S= '+s)
-    print("Is JS: " + s[-3:-1]+s[-1])
     return '.js' == s[-3:-1]+s[-1]
 
 # Read Input From NPM
@@ -158,8 +156,6 @@ def sendToIP(filename, ip):
     # ftp files
     sftp = paramiko.SFTPClient.from_transport(trans)
     print('copying files...')
-
-    print("Filename: " + filename)
     if isjs(filename):
         path = './app.js' # call the script app.js
     else:
@@ -177,7 +173,9 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
                              region= 'nyc1',
-                             image= 25615134, #Ubuntu NodeJS 6.11.0 on 16.04
+                             image= 25615134, #Ubuntu NodeJS 6.11.0 on 16.04 -- to get other images:
+                                                 #manager = digitalocean.Manager(token = pytoken)
+                                                 #manager.get_all_images()
                              size_slug='512mb',
                              ssh_keys = [ssh_key.id],
                              backups=True)
