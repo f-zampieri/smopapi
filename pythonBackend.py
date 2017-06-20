@@ -84,7 +84,9 @@ def parseLines(lines):
 
 # Checks if str is valid javascript file name
 def isjs(s):
-    return '.js' == s[-3:0]
+    print('S= '+s)
+    print("Is JS: " + s[-3:-1]+s[-1])
+    return '.js' == s[-3:-1]+s[-1]
 
 # Read Input From NPM
 def readIn():
@@ -156,11 +158,13 @@ def sendToIP(filename, ip):
     # ftp files
     sftp = paramiko.SFTPClient.from_transport(trans)
     print('copying files...')
+
+    print("Filename: " + filename)
     if isjs(filename):
         path = './app.js' # call the script app.js
     else:
         path = './'+filename # in root directory
-    localpath = filename
+    localpath = './'+filename
     sftp.put(localpath, path)
 
     # close
@@ -173,7 +177,7 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
                              region= 'nyc1',
-                             image= 'ubuntu-16-04-x32',
+                             image= 25615134, #Ubuntu NodeJS 6.11.0 on 16.04
                              size_slug='512mb',
                              ssh_keys = [ssh_key.id],
                              backups=True)
