@@ -46,3 +46,6 @@ Welcome to the API! Below is some info on what I plan on using:
 
 ## Notes on Python:
 * **To use PythonBackend** - read file block comment for install instructions and version info
+
+## Notes on Bash:
+* **All Bash (.sh) files are called from [js]setup.sh** - this file is called by Python
