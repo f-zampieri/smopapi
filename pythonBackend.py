@@ -128,7 +128,11 @@ def runSetup(ip, ssh_key, jsFilePath):
     print('Connected')
     
     # setup and run on server
-    commands = ['chmod +x jssetup.sh', './jssetup.sh']
+    commands = ['sudo apt-get update',
+                'export DEBIAN_FRONTEND=noninteractive',
+                'cd ..',
+                'sudo apt-get install -y nodejs-legacy', # doesn't work
+                'nodejs app.js']
     for command in commands:
         print('executing '+ str(command))
         stdin, stdout, stderr = connection.exec_command(command)
@@ -157,9 +161,9 @@ def sendToIP(filename, ip):
     sftp = paramiko.SFTPClient.from_transport(trans)
     print('copying files...')
     if isjs(filename):
-        path = './app.js' # call the script app.js
+        path = '/./app.js' # call the script app.js
     else:
-        path = './'+filename # in root directory
+        path = '/./'+filename # in root directory
     localpath = './'+filename
     sftp.put(localpath, path)
 
@@ -172,8 +176,8 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     # ask DigitalOcean.com to provision a server (d for droplet)
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
-                             region= 'nyc1',
-                             image= 25615134, #Ubuntu NodeJS 6.11.0 on 16.04 -- to get other images:
+                             region= 'nyc3',
+                             image= 25758188, #Ubuntu 17.04 x64
                                                  #manager = digitalocean.Manager(token = pytoken)
                                                  #manager.get_all_images()
                              size_slug='512mb',
