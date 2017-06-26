@@ -1,3 +1,5 @@
 sudo apt-get update
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install -y nodejs-legacy
+cd ..
+sudo apt-get install -y nodejs-legacy 
+nodejs app.js
