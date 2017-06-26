@@ -196,7 +196,8 @@ def test(jsFilePath):
     # destroy server and print operating cost (usually negligible)
     closeServer(d)
     print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
-    return #EOF
+    
+	return #EOF
     
 def main():
     # Read input
