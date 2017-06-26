@@ -12,23 +12,23 @@ Build 0.0.0
 Notes:
 
     Don't forget to pip install stuff.
-    This is the only not-automated step.
+    This is the only not-automated step (everything else should work out the box).
     
     All servers run on ubuntu-16-04-x32 slug at a size of 512mb.
     That should be more than enough space.
 
     To work with setup files, use (js)setup.sh. <- will offer different setups per language
-    Do not do any setup directly with Python, only with shell scripts.
+    Do not do any server setup directly with Python, only with shell scripts.
 	
-	If using new libraries for import, update documentation accordingly.
+    If using new libraries for import, update documentation accordingly.
 
     To Test Setup:
         1. Create JS file
         2. Run in Terminal:
             - python (or python3)
             - from pythonBackend import *
-            - test('route/to/file.js') <- or just 'foo.js'
-
+            - test('route/to/file.js') <- no attr results in testing of foo.js
+    
     For Build 0.0.0:
         Languages Offered:
             - Javascript  
@@ -43,6 +43,10 @@ pip: <- if running python3, command is pip3, not pip
 DigitalOcean Python Token:
     pyToken = b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d <- do not use without my permission
 
+SSH from Unix Machine:
+    cd path/to/smopapi
+    ssh -i key root@ip 
+
 '''
 
 #############################################################
@@ -52,7 +56,6 @@ DigitalOcean Python Token:
 import os, sys, time, subprocess, socket, digitalocean, paramiko
 
 from digitalocean import SSHKey
-from sendfile import sendfile
 
 try:
     import simplejson as json
@@ -78,6 +81,14 @@ def closeServer(d):
 def parseLines(lines):
     writeFile(lines)
     return
+
+# Checks if str is valid javascript file name
+def isjs(s):
+    return '.js' == s[-3:-1]+s[-1]
+
+def readCommands(file):
+    with open(file, 'r') as f:
+        return f.readlines()
 
 # Read Input From NPM
 def readIn():
@@ -109,21 +120,27 @@ def runSetup(ip, ssh_key, jsFilePath):
     if not success:
         print('Failed to connect')
         return
-    
-    print('connected')
 
     # send all files including setup and run files
-    filelist = [jsFilePath, 'jssetup.sh']
+    filelist = [jsFilePath]
     for f in filelist:
         try:
             sendToIP(f, ip)
         except Exception as e:
             print('Error with sending file: ' + str(e))
             return
-
+    print('Connected')
+    
     # setup and run on server
-    commands = ['./jssetup.sh']
-    for command in commands:
+    scommands = readCommands('jssetup.sh') # setup commands
+    for command in scommands: # silent
+        print('executing '+ str(command))
+        stdin, stdout, stderr = connection.exec_command(command)
+        print ("Errors")
+        print (stderr.read())
+
+    rcommands = ['nodejs ../app.js'] # run commands
+    for command in rcommands:
         print('executing '+ str(command))
         stdin, stdout, stderr = connection.exec_command(command)
         print (stdout.read())
@@ -134,24 +151,42 @@ def runSetup(ip, ssh_key, jsFilePath):
 
 # FTP Local Files
 def sendToIP(filename, ip):
-    with open(filename, 'rb') as file:
-        blocksize = os.path.getsize(filename)
-        s = socket.socket()
-        s.connect((str(ip), 8021))
-        offset = 0
-        while True:
-            sent = sendfile(s.fileno(), file.fileno(), offset, blocksize)
-            if sent == 0:
-                return
-            offset+=sent
+    # set up
+    PRIVATEKEY = 'key'
+    user = 'root'
+    server = ip
+    port = 22
+    paramiko.util.log_to_file("support_scripts.log")
+    trans = paramiko.Transport((server,port))
+    rsa_key = paramiko.RSAKey.from_private_key_file(PRIVATEKEY)
+
+    # connect
+    trans.connect(username=user, pkey=rsa_key)
+    session = trans.open_channel("session")
+
+    # ftp files
+    sftp = paramiko.SFTPClient.from_transport(trans)
+    print('copying files...')
+    if isjs(filename):
+        path = '/./app.js' # call the script app.js
+    else:
+        path = '/./'+filename # in root directory
+    localpath = './'+filename
+    sftp.put(localpath, path)
+
+    # close
+    sftp.close()
+    trans.close()
             
 # Create Server
 def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A PAID SERVICE, always close server when done
     # ask DigitalOcean.com to provision a server (d for droplet)
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
-                             region= 'nyc1',
-                             image= 'ubuntu-16-04-x32',
+                             region= 'nyc3',
+                             image= 25758188, #Ubuntu 17.04 x64
+                                                 #manager = digitalocean.Manager(token = pytoken)
+                                                 #manager.get_all_images()
                              size_slug='512mb',
                              ssh_keys = [ssh_key.id],
                              backups=True)
@@ -179,7 +214,7 @@ def writeFile(lines):
 
 # Run Functions 
 
-def test(jsFilePath):
+def test(jsFilePath='foo.js'):
     # ssh key get -- the key will work with the local files, do /not/ make new ones (aka, no ssh-keygen)
     ssh_key = digitalocean.Manager(token = pytoken).get_all_sshkeys()[0] # there should only be one
 
