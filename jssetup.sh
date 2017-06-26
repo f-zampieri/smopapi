@@ -1,5 +1,3 @@
 sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install nodejs
-# run node
-nodejs app.js
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get install -y nodejs-legacy

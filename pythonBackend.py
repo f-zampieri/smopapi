@@ -86,6 +86,10 @@ def parseLines(lines):
 def isjs(s):
     return '.js' == s[-3:-1]+s[-1]
 
+def readCommands(file):
+    with open(file, 'r') as f:
+        return f.readlines()
+
 # Read Input From NPM
 def readIn():
     lines = json.dumps(sys.stdin.readlines())
@@ -118,7 +122,7 @@ def runSetup(ip, ssh_key, jsFilePath):
         return
 
     # send all files including setup and run files
-    filelist = [jsFilePath, 'jssetup.sh']
+    filelist = [jsFilePath]
     for f in filelist:
         try:
             sendToIP(f, ip)
@@ -128,12 +132,15 @@ def runSetup(ip, ssh_key, jsFilePath):
     print('Connected')
     
     # setup and run on server
-    commands = ['sudo apt-get update',
-                'export DEBIAN_FRONTEND=noninteractive',
-                'cd ..',
-                'sudo apt-get install -y nodejs-legacy', # doesn't work
-                'nodejs app.js']
-    for command in commands:
+    scommands = readCommands('jssetup.sh') # setup commands
+    for command in scommands: # silent
+        print('executing '+ str(command))
+        stdin, stdout, stderr = connection.exec_command(command)
+        print ("Errors")
+        print (stderr.read())
+
+    rcommands = ['nodejs ../app.js'] # run commands
+    for command in rcommands:
         print('executing '+ str(command))
         stdin, stdout, stderr = connection.exec_command(command)
         print (stdout.read())
