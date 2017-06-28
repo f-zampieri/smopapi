@@ -229,10 +229,16 @@ def test(jsFilePath='foo.js'):
 
     # destroy server and print operating cost (usually negligible)
     closeServer(d)
+<<<<<<< HEAD:python/pythonBackend.py
     # print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
     return {'_owed':'$'+str(round(.007*timeAJS/60/60,2)),
             'out': out,
             'errors': errors}
+=======
+    print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
+    
+    return #EOF
+>>>>>>> 8546d6a5674343ffcab587b4cc5751e81b979b06:pythonBackend.py
     
 def main():
     # Read input
