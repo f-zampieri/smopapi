@@ -148,7 +148,7 @@ apiRoutes.get('/checkToken', function (req, res) {
 // route to parse and check code for standard issues
 apiRoutes.post('/post_codeCheck', function (req, res) {
 	console.log('AJS api init codeCheck');
-	var pyshell = new shell('pythonBackend.py');
+	var pyshell = new shell('python/pythonBackend.py');
 	// sends a message to the Python script via stdin
 	console.log("AJS REQ CODE:\n" + req.body.code);
 	pyshell.send(req.body.code);

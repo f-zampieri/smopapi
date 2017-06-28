@@ -1,7 +1,7 @@
 # for checking for compilation/syntax and some runtime errors
 # (c) Alex Shukhman 2/28/17
 
-#############################################################
+############################################################################
 
 # Info
 
@@ -43,13 +43,13 @@ pip: <- if running python3, command is pip3, not pip
 DigitalOcean Python Token:
     pyToken = b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d <- do not use without my permission
 
-SSH from Unix Machine:
+To SSH to server (requires unix machine or git bash):
     cd path/to/smopapi
-    ssh -i key root@ip 
-
+    ssh -i key root@[ip] -> ip being the server ip address
+    
 '''
 
-#############################################################
+############################################################################
 
 # Imports
 
@@ -62,14 +62,14 @@ try:
 except:
     import json
 
-#############################################################
+############################################################################
 
 # Globals (minimize use of globals)
 
 global pytoken
 pytoken = 'b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d'
 
-#############################################################
+############################################################################
 
 # Helper Functions
 
@@ -100,7 +100,7 @@ def runSetup(ip, ssh_key, jsFilePath):
     # connection setup
     connection = paramiko.SSHClient()
     connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    print('connecting...')
+    # print('server aquired, running commands...')
     
     # connect -- try a maximum of maxTries times
     maxTries = 10 # hopfully doesn't take more than like 2 or 3
@@ -109,7 +109,7 @@ def runSetup(ip, ssh_key, jsFilePath):
     while maxTries>tries:
         try:
             tries += 1
-            print('Try ' + str(tries))
+            #print('Try ' + str(tries))
             connection.connect(hostname=ip, username='root', key_filename='key')
             success = True
             break
@@ -118,8 +118,7 @@ def runSetup(ip, ssh_key, jsFilePath):
 
     # if it's just not working...        
     if not success:
-        print('Failed to connect')
-        return
+        return '', 'failed to connect' # error
 
     # send all files including setup and run files
     filelist = [jsFilePath]
@@ -127,27 +126,24 @@ def runSetup(ip, ssh_key, jsFilePath):
         try:
             sendToIP(f, ip)
         except Exception as e:
-            print('Error with sending file: ' + str(e))
-            return
-    print('Connected')
+            return '', 'Error with sending file: ' + str(e) # error
+    # print('connected to server, running commands...')
     
     # setup and run on server
     scommands = readCommands('jssetup.sh') # setup commands
     for command in scommands: # silent
-        print('executing '+ str(command))
-        stdin, stdout, stderr = connection.exec_command(command)
-        print ("Errors")
-        print (stderr.read())
+        # print('executing '+ str(command))
+        connection.exec_command(command)[2].read()
 
     rcommands = ['nodejs ../app.js'] # run commands
     for command in rcommands:
-        print('executing '+ str(command))
+        # print('executing '+ str(command))
         stdin, stdout, stderr = connection.exec_command(command)
-        print (stdout.read())
-        print ("Errors")
-        print (stderr.read())
+        out = stdout.read().decode("utf-8").strip()
+        # print ("Errors")
+        errors = stderr.read().decode("utf-8").strip()
     connection.close()
-    return
+    return out, errors
 
 # FTP Local Files
 def sendToIP(filename, ip):
@@ -166,7 +162,7 @@ def sendToIP(filename, ip):
 
     # ftp files
     sftp = paramiko.SFTPClient.from_transport(trans)
-    print('copying files...')
+    #print('copying files...')
     if isjs(filename):
         path = '/./app.js' # call the script app.js
     else:
@@ -196,7 +192,8 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     while True:
         d.load()
         if d.ip_address!=None:
-            print('IP: '+str(d.ip_address))
+            # print('IP ' + str(d.ip_address) +
+                  # 'acquired, acquiring rest of server ...')
             break
     while True:
         if "completed" in str(d.get_actions()[0].status):
@@ -210,7 +207,7 @@ def writeFile(lines):
             f.write(line)
     return
 
-#############################################################
+############################################################################
 
 # Run Functions 
 
@@ -221,27 +218,40 @@ def test(jsFilePath='foo.js'):
     # provision server then set it up and run code
     t0 = time.time()
     d = spinupServer("AJS", ssh_key)
-    runSetup(d.ip_address, ssh_key, jsFilePath)
-    try:
+    out, errors = runSetup(d.ip_address, ssh_key, jsFilePath)
+    
+    '''try:
         raw_input('To close server press ENTER')
     except:
-        input('To close server press ENTER')
+        input('To close server press ENTER')'''
+    
     timeAJS = time.time()-t0
 
     # destroy server and print operating cost (usually negligible)
     closeServer(d)
-    print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
-    return #EOF
+    # print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
+    return {'_owed':'$'+str(round(.007*timeAJS/60/60,2)),
+            'out': out,
+            'errors': errors}
     
 def main():
     # Read input
     lines = readIn()
 
+    # Write Lines to File
+    with open("foo.js", 'w') as f:
+        for line in lines:
+            f.write(line)
+
+    everything = test()
+    everything['success'] = True
+    everything['lines'] = lines
+    
     # Return Using Print
-    print(json.dumps({'success':True, 'lines':lines}))
+    print(json.dumps(everything))
 
     return #EOF
 
 # on call, start process
-'''if __name__ == '__main__':
-    main()'''
+if __name__ == '__main__':
+    main()

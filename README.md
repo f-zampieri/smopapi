@@ -49,3 +49,4 @@ Welcome to the API! Below is some info on what I plan on using:
 
 ## Notes on Bash:
 * **All Bash (.sh) files are called from [js]setup.sh** - this file is called by Python
+* Don't use any extra whitespace in [js]setup.sh file, it is read line by line by python and executed as commands
