@@ -86,7 +86,8 @@ def parseLines(lines):
 def isjs(s):
     return '.js' == s[-3:-1]+s[-1]
 
-def readCommands(file):
+# Read File
+def readFile(file):
     with open(file, 'r') as f:
         return f.readlines()
 
@@ -130,7 +131,7 @@ def runSetup(ip, ssh_key, jsFilePath):
     # print('connected to server, running commands...')
     
     # setup and run on server
-    scommands = readCommands('jssetup.sh') # setup commands
+    scommands = readFile('jssetup.sh') # setup commands
     for command in scommands: # silent
         # print('executing '+ str(command))
         connection.exec_command(command)[2].read()
@@ -202,7 +203,7 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
 
 # Write a File
 def writeFile(lines):
-    with open("foo.js", "w") as f:
+    with open("python/foo.js", "w") as f:
         for line in lines:
             f.write(line)
     return
@@ -211,7 +212,7 @@ def writeFile(lines):
 
 # Run Functions 
 
-def test(jsFilePath='foo.js'):
+def test(jsFilePath='python/foo.js'):
     # ssh key get -- the key will work with the local files, do /not/ make new ones (aka, no ssh-keygen)
     ssh_key = digitalocean.Manager(token = pytoken).get_all_sshkeys()[0] # there should only be one
 
@@ -229,29 +230,21 @@ def test(jsFilePath='foo.js'):
 
     # destroy server and print operating cost (usually negligible)
     closeServer(d)
-<<<<<<< HEAD:python/pythonBackend.py
     # print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
     return {'_owed':'$'+str(round(.007*timeAJS/60/60,2)),
             'out': out,
             'errors': errors}
-=======
-    print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
-    
-    return #EOF
->>>>>>> 8546d6a5674343ffcab587b4cc5751e81b979b06:pythonBackend.py
     
 def main():
     # Read input
     lines = readIn()
 
-    # Write Lines to File
-    with open("foo.js", 'w') as f:
-        for line in lines:
-            f.write(line)
+    writeFile(lines)
 
     everything = test()
     everything['success'] = True
-    everything['lines'] = lines
+
+    everything['lines'] = readFile('python/foo.js')
     
     # Return Using Print
     print(json.dumps(everything))

@@ -18,7 +18,6 @@ Welcome to the API! Below is some info on what I plan on using:
 * mongodb
 * mongoose
 * jsonwebtoken
-* nodemon
 * bash
 
 ## Some Helpful Resources 
