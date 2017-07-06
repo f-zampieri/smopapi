@@ -6,22 +6,17 @@
 # Info
 
 '''
-
 Build 0.0.0
-
 Notes:
-
     Don't forget to pip install stuff.
     This is the only not-automated step (everything else should work out the box).
     
     All servers run on ubuntu-16-04-x32 slug at a size of 512mb.
     That should be more than enough space.
-
     To work with setup files, use (js)setup.sh. <- will offer different setups per language
     Do not do any server setup directly with Python, only with shell scripts.
 	
     If using new libraries for import, update documentation accordingly.
-
     To Test Setup:
         1. Create JS file
         2. Run in Terminal:
@@ -34,15 +29,12 @@ Notes:
             - Javascript  
         Build Platforms:
             - .js: Nodejs JS Compiler
-
 pip: <- if running python3, command is pip3, not pip
     pip install -U python-digitalocean
     pip install -U paramiko
     pip install -U pysendfile
-
 DigitalOcean Python Token:
     pyToken = b3b477b085ab490b0360a33df665fbcb07752051e08fd554debd16b7eaa9b51d <- do not use without my permission
-
 To SSH to server (requires unix machine or git bash):
     cd path/to/smopapi
     ssh -i key root@[ip] -> ip being the server ip address
