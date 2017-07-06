@@ -114,12 +114,13 @@ def runSetup(ip, ssh_key, jsFilePath):
             connection.connect(hostname=ip, username='root', key_filename='key')
             success = True
             break
-        except:
+        except Exception as e:
+            #print(e)
             time.sleep(5) # give it a sec or two...
 
     # if it's just not working...        
     if not success:
-        return '', 'failed to connect' # error
+        return '', 'failed to connect because '+str(e) # error
 
     # send all files including setup and run files
     filelist = [jsFilePath]
@@ -131,7 +132,10 @@ def runSetup(ip, ssh_key, jsFilePath):
     # print('connected to server, running commands...')
     
     # setup and run on server
-    scommands = readFile('jssetup.sh') # setup commands
+    try:
+        scommands = readFile('jssetup.sh') # setup commands
+    except:
+        scommands = readFile('python/jssetup.sh')
     for command in scommands: # silent
         # print('executing '+ str(command))
         connection.exec_command(command)[2].read()
@@ -181,7 +185,7 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
                              region= 'nyc3',
-                             image= 25758188, #Ubuntu 17.04 x64
+                             image= 25948452, #Ubuntu 17.04 x64
                                                  #manager = digitalocean.Manager(token = pytoken)
                                                  #manager.get_all_images()
                              size_slug='512mb',
@@ -212,7 +216,7 @@ def writeFile(lines):
 
 # Run Functions 
 
-def test(jsFilePath='python/foo.js'):
+def test(jsFilePath='foo.js'):
     # ssh key get -- the key will work with the local files, do /not/ make new ones (aka, no ssh-keygen)
     ssh_key = digitalocean.Manager(token = pytoken).get_all_sshkeys()[0] # there should only be one
 
@@ -241,7 +245,7 @@ def main():
 
     writeFile(lines)
 
-    everything = test()
+    everything = test('python/foo.js')
     everything['success'] = True
 
     everything['lines'] = readFile('python/foo.js')

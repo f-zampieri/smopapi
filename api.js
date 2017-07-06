@@ -157,7 +157,7 @@ apiRoutes.post('/post_codeCheck', function (req, res) {
 		message = JSON.parse(message);
 		console.log(message);
 		res.json({
-			success: message.success
+			success: req.body.success
 			, data: req.body.code
 		});
 	});
