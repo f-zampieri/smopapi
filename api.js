@@ -150,15 +150,14 @@ apiRoutes.post('/post_codeCheck', function (req, res) {
 	console.log('AJS api init codeCheck');
 	var pyshell = new shell('python/pythonBackend.py');
 	// sends a message to the Python script via stdin
-	console.log("AJS REQ CODE:\n" + req.body.code);
 	pyshell.send(req.body.code);
 	pyshell.on('message', function (message) {
 		// receives python print statement 
 		message = JSON.parse(message);
 		console.log(message);
 		res.json({
-			success: req.body.success
-			, data: req.body.code
+			pySuccess: message.success
+			, data: message.errors
 		});
 	});
 	// end the input stream and allow the process to exit
@@ -169,7 +168,8 @@ apiRoutes.post('/post_codeCheck', function (req, res) {
 });
 // route to get user info
 apiRoutes.get('/get_info', function (req, res) {
-	var name = req.body.name || req.query.name || req.headers['x-access-name'];
+	var name = req.headers['x-access-name'];
+	var typeuser = req.headers['coder_owner']
 	UserInfo.findOne({
 		name: name
 	}, function (err, object) {
@@ -182,13 +182,22 @@ apiRoutes.get('/get_info', function (req, res) {
 		}
 		else if (object) {
 			if (object.info) {
-				res.json({
-					success: true
-					, message: 'info acquired'
-					, info: object.info
-				});
+				if (object.info.typeuser) {
+					res.json({
+						success: true
+						, message: 'info acquired'
+						, info: object.info
+					});
+				}
+				else {
+					res.json({
+						success: true
+						, message: 'no info found'
+						, info: '//this is where you edit your info'
+					});
+				}
 			}
-			else if (!object.info) {
+			else {
 				res.json({
 					success: true
 					, message: 'no info found'
