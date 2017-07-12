@@ -12,6 +12,7 @@ var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var User = require('./api/models/user'); // get mongoose model
 var UserInfo = require('./api/models/userinfo'); // get mongoose model
+var Task = require('./api/models/task'); // get mongoose model
 // =======================
 // configuration =========
 // =======================
@@ -206,6 +207,29 @@ apiRoutes.get('/get_info', function (req, res) {
 			}
 		}
 	});
+});
+apiRoutes.get('/get_feed', (req, res) => {
+	var name = req.headers['x-access-name'];
+	var typeuser = req.headers['coder_owner']
+	if (typeuser == 'coder') {
+		Task.find({
+			lang: "js"
+		}, (err, result) => {
+			if (err) throw err;
+			if (result.name) {
+				res.json({
+					success: true
+					, result: result
+				});
+			}
+			else {
+				res.json({
+					success: true
+					, result: 'No Tasks Found'
+				});
+			}
+		});
+	}
 });
 // apply the routes to our application with the prefix /api
 app.use('/api', apiRoutes);
