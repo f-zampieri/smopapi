@@ -230,6 +230,25 @@ apiRoutes.get('/get_feed', (req, res) => {
 			}
 		});
 	}
+	else if (typeuser == 'owner') {
+		Task.find({
+			owner: name
+		}, (err, result) => {
+			if (err) throw err;
+			if (result.name) {
+				res.json({
+					success: true
+					, result: result
+				});
+			}
+			else {
+				res.json({
+					success: true
+					, result: 'No Tasks Found'
+				});
+			}
+		});
+	}
 });
 // apply the routes to our application with the prefix /api
 app.use('/api', apiRoutes);
