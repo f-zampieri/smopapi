@@ -1,2 +1,2 @@
 # Contributing Guidelines:
-DO NOT CONTRIBUTE DIRECTLY TO THIS REO without the express permission from Alex Shukhman (alex.jacob.shukhman@gmail.com)
+**DO NOT CONTRIBUTE DIRECTLY TO THIS REPO** without the express permission from Alex Shukhman (alex.jacob.shukhman@gmail.com)
