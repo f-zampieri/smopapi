@@ -32,7 +32,7 @@ app.use(morgan('dev'));
 // =======================
 // create user
 app.post('/newuser', function (req, res) {
-	// create a sample user
+	// create a user
 	var nick = new User({
 		name: req.body.name
 		, password: req.body.password
@@ -208,15 +208,15 @@ apiRoutes.get('/get_info', function (req, res) {
 		}
 	});
 });
+// Get the Task Feed (Coder and Owner)
 apiRoutes.get('/get_feed', (req, res) => {
 	var name = req.headers['x-access-name'];
 	var typeuser = req.headers['coder_owner']
 	if (typeuser == 'coder') {
-		Task.find({
-			lang: "js"
-		}, (err, result) => {
+		Task.find({}, (err, result) => {
 			if (err) throw err;
-			if (result.name) {
+			console.log('Result:', result);
+			if (result != []) {
 				res.json({
 					success: true
 					, result: result
@@ -235,7 +235,7 @@ apiRoutes.get('/get_feed', (req, res) => {
 			owner: name
 		}, (err, result) => {
 			if (err) throw err;
-			if (result.name) {
+			if (result != []) {
 				res.json({
 					success: true
 					, result: result
@@ -249,6 +249,28 @@ apiRoutes.get('/get_feed', (req, res) => {
 			}
 		});
 	}
+});
+// Create a new task
+apiRoutes.post('/post_newtask', function (req, res) {
+	// create a task
+	var task = new Task({
+		name: req.body.name
+		, lang: req.body.lang
+		, owner: req.headers['x-access-name']
+		, task: {
+			message: req.body.task_message
+			, pet_code: req.body.task_pet_code
+		}
+		, bounty: req.body.bounty
+	});
+	// save the sample user
+	task.save(function (err) {
+		if (err) throw err;
+		console.log('Task saved successfully');
+		res.json({
+			success: true
+		});
+	});
 });
 // apply the routes to our application with the prefix /api
 app.use('/api', apiRoutes);

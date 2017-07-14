@@ -6,7 +6,10 @@ module.exports = mongoose.model('Tasks', new Schema({
 	name: String
 	, lang: String
 	, owner: String
-	, task: Object
+	, task: {
+		message: String
+		, pet_code: String
+	}
 	, bounty: Number
 	, date: {
 		type: Date
