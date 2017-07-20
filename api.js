@@ -18,6 +18,7 @@ var Task = require('./api/models/task'); // get mongoose model
 // =======================
 var port = process.env.PORT || 3001; // used to create, sign, and verify tokens
 mongoose.Promise = require('bluebird');
+mongoose.Promise = global.Promise;
 mongoose.connect(config.database_dev); // connect to database
 app.set('superSecret', config.secret); // secret variable
 // use body parser so we can get info from POST and/or URL parameters
@@ -213,9 +214,10 @@ apiRoutes.get('/get_feed', (req, res) => {
 	var name = req.headers['x-access-name'];
 	var typeuser = req.headers['coder_owner']
 	if (typeuser == 'coder') {
-		Task.find({}, (err, result) => {
+		Task.find({
+			lang: req.headers['lang']
+		}, (err, result) => {
 			if (err) throw err;
-			console.log('Result:', result);
 			if (result != []) {
 				res.json({
 					success: true
@@ -258,7 +260,8 @@ apiRoutes.post('/post_newtask', function (req, res) {
 		, lang: req.body.lang
 		, owner: req.headers['x-access-name']
 		, task: {
-			message: req.body.task_message
+			message_short: req.body.task_message_short
+			, message_long: req.body.task_message_long
 			, pet_code: req.body.task_pet_code
 		}
 		, bounty: req.body.bounty
@@ -269,6 +272,20 @@ apiRoutes.post('/post_newtask', function (req, res) {
 		console.log('Task saved successfully');
 		res.json({
 			success: true
+		});
+	});
+});
+// Get a Single Task
+apiRoutes.get('/get_singletask', (req, res) => {
+	console.log('getting singletask');
+	Task.find({
+		_id: req.headers['id']
+	}, (err, result) => {
+		if (err) throw err;
+		console.log('got singletask');
+		res.json({
+			success: true
+			, result: result
 		});
 	});
 });

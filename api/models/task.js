@@ -7,7 +7,8 @@ module.exports = mongoose.model('Tasks', new Schema({
 	, lang: String
 	, owner: String
 	, task: {
-		message: String
+		message_short: String
+		, message_long: String
 		, pet_code: String
 	}
 	, bounty: Number
