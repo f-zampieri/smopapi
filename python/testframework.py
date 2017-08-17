@@ -32,13 +32,14 @@ def getOutputs(js):
             f.write(lines) # copy and paste original file
         for lines in js:
             f.write(lines) # add test cases
-    process = subprocess.Popen('node jsmiddleware.js', stdout = subprocess.PIPE)
+    process = subprocess.Popen(['node', 'jsmiddleware.js'], stdout = subprocess.PIPE, stderr=subprocess.PIPE)
     outputs, err = process.communicate()
     if err:
         print(err)
     return outputs
 
-filelines = readFile('tests.parth')
-js = createjs(filelines)
-results = getOutputs(js)
-print (toDict(results.decode('utf-8')))
+if __name__ == '__main__':
+    filelines = readFile('tests.parth')
+    js = createjs(filelines)
+    results = getOutputs(js)
+    print (toDict(results.decode('utf-8')))
