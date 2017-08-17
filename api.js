@@ -13,6 +13,7 @@ var config = require('./config'); // get our config file
 var User = require('./api/models/user'); // get mongoose model
 var UserInfo = require('./api/models/userinfo'); // get mongoose model
 var Task = require('./api/models/task'); // get mongoose model
+var Response = require('./api/models/response'); // get mongoose model
 // =======================
 // configuration =========
 // =======================
@@ -147,25 +148,65 @@ apiRoutes.get('/checkToken', function (req, res) {
 		success: true
 	});
 });
+// save response
+apiRoutes.post('/post_ResponseSave', (req, res) => {
+	Response.findOne({
+		task_id: req.body.id
+		, coder: req.headers['x-access-name']
+	}, (err, response) => {
+		if (err) throw err;
+		if (!response) {
+			var new_response = new Response({
+				coder: req.headers['x-access-name']
+				, code: req.body.data
+				, lang: 'js'
+				, task_id: req.body.id
+				, success: false
+			});
+			new_response.save(function (err) {
+				if (err) throw err;
+				console.log('New response saved successfully');
+				res.json({
+					success: true
+				});
+			});
+		}
+		else {
+			response.code = req.body.data;
+			response.save((err, result) => {
+				if (err) throw err;
+				console.log('updated response');
+				res.json({
+					success: true
+					, result: result
+				});
+			});
+		}
+	});
+});
 // route to parse and check code for standard issues
 apiRoutes.post('/post_codeCheck', function (req, res) {
 	console.log('AJS api init codeCheck');
 	var pyshell = new shell('python/pythonBackend.py');
-	// sends a message to the Python script via stdin
-	pyshell.send(req.body.code);
-	pyshell.on('message', function (message) {
-		// receives python print statement 
-		message = JSON.parse(message);
-		console.log(message);
-		res.json({
-			pySuccess: message.success
-			, data: message.errors
+	Task.findOne({
+		id: req.body.id
+	}, "task.unit_tests", (err, tests) => {
+		// sends a message to the Python script via stdin
+		pyshell.send([req.body.code, tests]);
+		pyshell.on('message', function (message) {
+			// receives python print statement 
+			message = JSON.parse(message);
+			console.log(message);
+			res.json({
+				pySuccess: message.success
+				, data: message.errors
+			});
 		});
-	});
-	// end the input stream and allow the process to exit
-	pyshell.end(function (err) {
-		if (err) throw err;
-		console.log('py is finished');
+		// end the input stream and allow the process to exit
+		pyshell.end(function (err) {
+			if (err) throw err;
+			console.log('py is finished');
+		});
 	});
 });
 // route to get user info
@@ -212,7 +253,7 @@ apiRoutes.get('/get_info', function (req, res) {
 // Get the Task Feed (Coder and Owner)
 apiRoutes.get('/get_feed', (req, res) => {
 	var name = req.headers['x-access-name'];
-	var typeuser = req.headers['coder_owner']
+	var typeuser = req.headers['coder_owner'];
 	if (typeuser == 'coder') {
 		Task.find({
 			lang: req.headers['lang']
@@ -263,6 +304,7 @@ apiRoutes.post('/post_newtask', function (req, res) {
 			message_short: req.body.task_message_short
 			, message_long: req.body.task_message_long
 			, pet_code: req.body.task_pet_code
+			, unit_tests: req.body.task_unit_tests
 		}
 		, bounty: req.body.bounty
 	});
@@ -286,6 +328,80 @@ apiRoutes.get('/get_singletask', (req, res) => {
 		res.json({
 			success: true
 			, result: result
+		});
+	});
+});
+// Get Task Status
+apiRoutes.get('/get_taskStatus', (req, res) => {
+	console.log('getting task status');
+	Response.findOne({
+		task_id: req.headers['id']
+	}, (err, result) => {
+		if (err) {
+			res.json({
+				success: false
+				, result: err
+			});
+		}
+		else if (!result) {
+			res.json({
+				success: true
+				, result: 'not started'
+			});
+		}
+		else {
+			Response.findOne({
+				task_id: req.headers['id']
+				, success: true
+			}, (err, result) => {
+				if (err) {
+					res.json({
+						success: false
+						, result: err
+					});
+				}
+				else if (!result) {
+					res.json({
+						success: true
+						, result: 'in progress'
+					});
+				}
+				else {
+					res.json({
+						success: true
+						, result: 'done'
+					});
+				}
+			});
+		}
+	});
+});
+// Create a new task
+apiRoutes.post('/post_updatetask', function (req, res) {
+	// create a task
+	var task = Task.findOne({
+		_id: req.body.id
+	}, (err, task) => {
+		if (err) {
+			res.json({
+				success: false
+				, result: err
+			});
+		}
+		task.name = req.body.name;
+		task.lang = req.body.lang;
+		task.task.message_short = req.body.task_message_short;
+		task.task.message_long = req.body.task_message_long;
+		task.task.pet_code = req.body.task_pet_code;
+		task.task.unit_tests = req.body.task_unit_tests;
+		task.bounty = req.body.bounty;
+		task.save((err, result) => {
+			if (err) throw err;
+			console.log('updated task');
+			res.json({
+				success: true
+				, result: result
+			});
 		});
 	});
 });

@@ -75,8 +75,8 @@ def parseLines(lines):
     return
 
 # Checks if str is valid javascript file name
-def isjs(s):
-    return '.js' == s[-3:-1]+s[-1]
+def isblank(s, blank):
+    return "."+blank == s[-1*(len(blank)+1):-1]+s[-1]
 
 # Read File
 def readFile(file):
@@ -89,11 +89,11 @@ def readIn():
     return json.loads(lines)
 
 # Set Up Server and Run JS File
-def runSetup(ip, ssh_key, jsFilePath):
+def runSetup(ip, ssh_key, jsFilePath, pyFilePath, parthFilePath):
     # connection setup
     connection = paramiko.SSHClient()
     connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    # print('server aquired, running commands...')
+    print('server aquired, running commands...')
     
     # connect -- try a maximum of maxTries times
     maxTries = 10 # hopfully doesn't take more than like 2 or 3
@@ -102,12 +102,12 @@ def runSetup(ip, ssh_key, jsFilePath):
     while maxTries>tries:
         try:
             tries += 1
-            #print('Try ' + str(tries))
+            print('Try ' + str(tries))
             connection.connect(hostname=ip, username='root', key_filename='key')
             success = True
             break
         except Exception as e:
-            #print(e)
+            # print(e)
             time.sleep(5) # give it a sec or two...
 
     # if it's just not working...        
@@ -115,32 +115,40 @@ def runSetup(ip, ssh_key, jsFilePath):
         return '', 'failed to connect because '+str(e) # error
 
     # send all files including setup and run files
-    filelist = [jsFilePath]
+    filelist = [jsFilePath, pyFilePath, parthFilePath]
     for f in filelist:
         try:
             sendToIP(f, ip)
         except Exception as e:
             return '', 'Error with sending file: ' + str(e) # error
-    # print('connected to server, running commands...')
+    print('connected to server, running setup...')
     
     # setup and run on server
     try:
         scommands = readFile('jssetup.sh') # setup commands
     except:
         scommands = readFile('python/jssetup.sh')
+        
     for command in scommands: # silent
-        # print('executing '+ str(command))
-        connection.exec_command(command)[2].read()
-
-    rcommands = ['nodejs ../app.js'] # run commands
-    for command in rcommands:
-        # print('executing '+ str(command))
+        print('executing '+ str(command))
         stdin, stdout, stderr = connection.exec_command(command)
         out = stdout.read().decode("utf-8").strip()
-        # print ("Errors")
+        #print(out)
+        #print ("Errors")
+        errors = stderr.read().decode("utf-8").strip()
+        #print(errors)
+        print('done!')
+
+    rcommands = ['cd ..', 'ls -a', 'python testframework.py'] # run commands
+    for command in rcommands:
+        print('executing '+ str(command))
+        stdin, stdout, stderr = connection.exec_command(command)
+        out = stdout.read().decode("utf-8").strip()
+        print(out)
+        #print ("Errors")
         errors = stderr.read().decode("utf-8").strip()
     connection.close()
-    return out, errors
+    return out, errors, ip
 
 # FTP Local Files
 def sendToIP(filename, ip):
@@ -159,9 +167,13 @@ def sendToIP(filename, ip):
 
     # ftp files
     sftp = paramiko.SFTPClient.from_transport(trans)
-    #print('copying files...')
-    if isjs(filename):
-        path = '/./app.js' # call the script app.js
+    print('copying files...')
+    if isblank(filename, 'js'):
+        path = '/./app.js' # call the script 'app.js'
+    elif isblank(filename, 'py'):
+        path = '/./testframework.py' # call the test framework 'testframework.py'
+    elif isblank(filename, 'parth'):
+        path = '/./tests.parth' # call the test file 'tests.parth'
     else:
         path = '/./'+filename # in root directory
     localpath = './'+filename
@@ -177,7 +189,7 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     d = digitalocean.Droplet(token=pytoken,
                              name='test'+token,
                              region= 'nyc3',
-                             image= 25948452, #Ubuntu 17.04 x64
+                             image= 26446785, #Ubuntu 17.04 x64
                                                  #manager = digitalocean.Manager(token = pytoken)
                                                  #manager.get_all_images()
                              size_slug='512mb',
@@ -189,8 +201,8 @@ def spinupServer(token, ssh_key): # DO NOT RUN WITHOUT MY PERMISSION, THIS IS A 
     while True:
         d.load()
         if d.ip_address!=None:
-            # print('IP ' + str(d.ip_address) +
-                  # 'acquired, acquiring rest of server ...')
+            print('IP ' + str(d.ip_address) +
+                  ' acquired, acquiring rest of server ...')
             break
     while True:
         if "completed" in str(d.get_actions()[0].status):
@@ -208,14 +220,14 @@ def writeFile(lines):
 
 # Run Functions 
 
-def test(jsFilePath='foo.js'):
+def test(jsFilePath='app.js', pyFilePath='testframework.py', parthFilePath='tests.parth'):
     # ssh key get -- the key will work with the local files, do /not/ make new ones (aka, no ssh-keygen)
     ssh_key = digitalocean.Manager(token = pytoken).get_all_sshkeys()[0] # there should only be one
 
     # provision server then set it up and run code
     t0 = time.time()
     d = spinupServer("AJS", ssh_key)
-    out, errors = runSetup(d.ip_address, ssh_key, jsFilePath)
+    out, errors, ip = runSetup(d.ip_address, ssh_key, jsFilePath, pyFilePath, parthFilePath)
     
     '''try:
         raw_input('To close server press ENTER')
@@ -223,11 +235,11 @@ def test(jsFilePath='foo.js'):
         input('To close server press ENTER')'''
     
     timeAJS = time.time()-t0
-
+    input('press enter, ip = '+str(ip))
     # destroy server and print operating cost (usually negligible)
     closeServer(d)
-    # print('$'+str(round(.007*timeAJS/60/60,2))) # how much cash you owe me
-    return {'_owed':'$'+str(round(.007*timeAJS/60/60,2)),
+    # print('$'+str(round(.03*timeAJS/60/60,2))) # how much cash you owe me
+    return {'_owed':'$'+str(round(.03*timeAJS/60/60,2)),
             'out': out,
             'errors': errors}
     
@@ -247,6 +259,6 @@ def main():
 
     return #EOF
 
-# on call, start process
+'''# on call, start process
 if __name__ == '__main__':
-    main()
+    main()'''

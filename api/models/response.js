@@ -2,17 +2,12 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 // set up a mongoose model 
-var Tasks = new Schema({
-	name: String
+var Responses = new Schema({
+	coder: String
+	, code: String
 	, lang: String
-	, owner: String
-	, task: {
-		message_short: String
-		, message_long: String
-		, pet_code: String
-		, unit_tests: String
-	}
-	, bounty: Number
+	, task_id: String
+	, success: Boolean
 	, created_at: {
 		type: Date
 	}
@@ -21,7 +16,7 @@ var Tasks = new Schema({
 	}
 });
 // middle ware in serial
-Tasks.pre('save', function (next) {
+Responses.pre('save', function preSave(next) {
 	now = new Date();
 	this.updated_at = now;
 	if (!this.created_at) {
@@ -33,4 +28,4 @@ Tasks.pre('save', function (next) {
 	next();
 });
 // Pass model using module.exports
-module.exports = mongoose.model('Tasks', Tasks);
+module.exports = mongoose.model('Responses', Responses);
