@@ -2,3 +2,4 @@
 ./python/jsmiddleware.js
 # logs
 *.log
+.git

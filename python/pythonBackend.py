@@ -99,6 +99,7 @@ def parseout(everything):
         else:
             everything['success'] = False
             everything['test_errors'] = 'Tests failed = ' + str(failed_tests)
+			everything['errors'] = 'Not all unit tests passed. Other Errors:'+everything['errors']
             
     except Exception as e:
         everything['success'] = False
