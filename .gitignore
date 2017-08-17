@@ -1,0 +1,4 @@
+# temp files
+./python/jsmiddleware.js
+# logs
+*.log
