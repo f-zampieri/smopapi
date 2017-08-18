@@ -16,7 +16,7 @@ var Responses = new Schema({
 	}
 });
 // middle ware in serial
-Responses.pre('save', function preSave(next) {
+Responses.pre('save', function (next) {
 	now = new Date();
 	this.updated_at = now;
 	if (!this.created_at) {

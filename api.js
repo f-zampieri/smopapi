@@ -188,15 +188,53 @@ apiRoutes.post('/post_ResponseSave', (req, res) => {
 apiRoutes.post('/post_codeCheck', function (req, res) {
 	console.log('AJS api init codeCheck');
 	var pyshell = new shell('python/pythonBackend.py');
-	Task.findOne({
-		id: req.body.id
-	}, "task.unit_tests", (err, tests) => {
+	Task.findById(req.body.id, "task.unit_tests", (err, tests) => {
 		// sends a message to the Python script via stdin
-		pyshell.send([req.body.code, tests]);
+		if (!tests || !tests.task.unit_tests) {
+			tests = '';
+			console.log('no tests found');
+		}
+		else tests = tests.task.unit_tests;
+		pyshell.send(JSON.stringify([req.body.code, tests]));
 		pyshell.on('message', function (message) {
 			// receives python print statement 
 			message = JSON.parse(message);
-			console.log(message);
+			if (message.success == 'true') {
+				Task.findById(req.body.id, (err, task) => {
+					task.success = true
+					task.save((err, result) => {
+						if (err) throw err;
+					});
+				});
+				Response.findOne({
+					task_id: req.body.id
+					, coder: req.headers['x-access-name']
+				}, (err, response) => {
+					if (err) throw err;
+					response.success = true;
+					response.save((err, result) => {
+						if (err) throw err;
+					})
+				});
+			}
+			else {
+				Task.findById(req.body.id, (err, task) => {
+					task.success = false
+					task.save((err, result) => {
+						if (err) throw err;
+					});
+				});
+				Response.findOne({
+					task_id: req.body.id
+					, coder: req.headers['x-access-name']
+				}, (err, response) => {
+					if (err) throw err;
+					response.success = false;
+					response.save((err, result) => {
+						if (err) throw err;
+					})
+				});
+			}
 			res.json({
 				pySuccess: message.success
 				, data: message.errors
@@ -319,17 +357,48 @@ apiRoutes.post('/post_newtask', function (req, res) {
 });
 // Get a Single Task
 apiRoutes.get('/get_singletask', (req, res) => {
-	console.log('getting singletask');
-	Task.find({
-		_id: req.headers['id']
-	}, (err, result) => {
-		if (err) throw err;
-		console.log('got singletask');
-		res.json({
-			success: true
-			, result: result
+	if (req.headers['coder_owner'] == 'owner') {
+		Task.find({
+			_id: req.headers['id']
+		}, (err, result) => {
+			if (err) throw err;
+			console.log('got singletask');
+			res.json({
+				success: true
+				, result: result
+				, mtype: 'json'
+			});
 		});
-	});
+	}
+	else {
+		Response.findOne({
+			coder: req.headers['x-access-name']
+			, task_id: req.headers['id']
+		}, "code", (err, resultOut) => {
+			console.log('result out:', resultOut);
+			if (err) throw err;
+			if (!resultOut) {
+				Task.find({
+					_id: req.headers['id']
+				}, (err, result) => {
+					if (err) throw err;
+					console.log('got singletask');
+					res.json({
+						success: true
+						, result: result
+						, mtype: 'json'
+					});
+				});
+			}
+			else {
+				res.json({
+					success: true
+					, result: resultOut.code
+					, mtype: 'code'
+				});
+			}
+		});
+	}
 });
 // Get Task Status
 apiRoutes.get('/get_taskStatus', (req, res) => {

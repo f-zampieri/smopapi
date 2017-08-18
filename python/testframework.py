@@ -1,6 +1,6 @@
 import re, ast, json, subprocess
 
-def toDict(s):
+def unString(s):
     return ast.literal_eval(s)
 
 def readFile(f):
@@ -42,4 +42,4 @@ if __name__ == '__main__':
     filelines = readFile('tests.parth')
     js = createjs(filelines)
     results = getOutputs(js)
-    print (toDict(results.decode('utf-8')))
+    print (unString(results.decode('utf-8')))

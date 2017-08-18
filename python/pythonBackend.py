@@ -83,26 +83,26 @@ def isfiletype(s, blank):
 # Parse Test Results
 def parseout(everything):
     try:
-        everything['success'] = True
-        everything['out'] = testframework.toDict(everything['out'])
+        everything['success'] = 'true'
+        everything['out'] = testframework.unString(everything['out'])
         failed_tests = []
         for key in everything['out'].keys():
             if everything['out'][key] == 'false': #test if any tests failed
                 failed_tests.append(key)
                 
         if everything['errors'] != '':
-            everything['success'] = False
+            everything['success'] = 'false'
             
         if len(failed_tests) == 0:
             everything['test_errors'] = ''
 
         else:
-            everything['success'] = False
+            everything['success'] = 'false'
             everything['test_errors'] = 'Tests failed = ' + str(failed_tests)
-			everything['errors'] = 'Not all unit tests passed. Other Errors:'+everything['errors']
+            everything['errors'] = 'Not all unit tests passed. Other Errors:'+everything['errors']
             
     except Exception as e:
-        everything['success'] = False
+        everything['success'] = 'false'
         everything['errors'] = 'Test Error, please contact the owner of this task'
         everything['test_errors'] = 'Unsuccessful Testing, something may be wrong with the tests'
 
@@ -124,7 +124,7 @@ def runSetup(ip, ssh_key, jsFilePath, pyFilePath, parthFilePath, verbose):
     connection = paramiko.SSHClient()
     connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     if verbose:
-        print('server aquired, running commands...')
+        print('server acquired, running commands...')
     
     # connect -- try a maximum of maxTries times
     maxTries = 10 # hopfully doesn't take more than like 2 or 3
@@ -247,8 +247,8 @@ def spinupServer(token, ssh_key, verbose): # DO NOT RUN WITHOUT MY PERMISSION, T
     return d
 
 # Write a File
-def writeFile(lines):
-    with open("python/foo.js", "w") as f:
+def writeFile(lines, name):
+    with open(name, "w") as f:
         for line in lines:
             f.write(line)
     return
@@ -282,9 +282,10 @@ def test(jsFilePath='app.js', pyFilePath='testframework.py', parthFilePath='test
     
 def main():
     # Read input
-    lines = readIn()
+    lines = json.loads(readIn()[0])
 
-    writeFile(lines)
+    writeFile(lines[0], "python/app.js")
+    writeFile(lines[1], "python/tests.parth")
 
     everything = test(jsFilePath='python/app.js', pyFilePath='python/testframework.py', parthFilePath='python/tests.parth', verbose = False)
     everything = parseout(everything)

@@ -13,6 +13,7 @@ var Tasks = new Schema({
 		, unit_tests: String
 	}
 	, bounty: Number
+	, success: Boolean
 	, created_at: {
 		type: Date
 	}
