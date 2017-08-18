@@ -1,5 +1,5 @@
 # smop. API
-Welcome to the API! Below is some info on what I plan on using:
+Welcome to the API! Below is some info on what I am using:
 
 ## Lang/Lib:
 * html
