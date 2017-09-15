@@ -6,7 +6,7 @@
 	, "scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 		, "start": "node api.js"
-		, "forever": "forever -m5 -t npm start"
+		, "forever": "forever -m5 -t start"
 		, "kill": "forever stop"
 	}
 	, "repository": {
