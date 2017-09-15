@@ -1,36 +1,39 @@
 {
-	"name": "smopapi"
-	, "version": "1.0.0"
-	, "description": "smop. API"
-	, "main": "api.js"
-	, "scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-		, "start": "node api.js"
-	}
-	, "repository": {
-		"type": "git"
-		, "url": "git+https://github.com/AlexShukhman/smopapi.git"
-	}
-	, "author": "alex shukhman"
-	, "license": "ISC"
-	, "bugs": {
-		"url": "https://github.com/AlexShukhman/smopapi/issues"
-	}
-	, "homepage": "https://github.com/AlexShukhman/smopapi#readme"
-	, "dependencies": {
-		"bluebird": "^3.4.7"
-		, "body-parser": "^1.16.0"
-		, "cookie-parser": "~1.3.5"
-		, "crypto": "0.0.3"
-		, "debug": "~2.2.0"
-		, "express": "^4.14.1"
-		, "filesystem": "^1.0.1"
-		, "jsonwebtoken": "^7.2.1"
-		, "mongodb": "^2.2.19"
-		, "mongoose": "^4.8.0"
-		, "monk": "^1.0.1"
-		, "morgan": "^1.5.3"
-		, "pug": "^2.0.0-beta6"
-		, "serve-favicon": "~2.2.1"
-	}
+  "name": "smopapi",
+  "version": "1.0.0",
+  "description": "smop. API",
+  "main": "api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node api.js",
+    "forever": "forever -m5 -t ./bin/www",
+    "kill": "forever stop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexShukhman/smopapi.git"
+  },
+  "author": "alex shukhman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexShukhman/smopapi/issues"
+  },
+  "homepage": "https://github.com/AlexShukhman/smopapi#readme",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "body-parser": "^1.16.0",
+    "cookie-parser": "~1.3.5",
+    "crypto": "0.0.3",
+    "debug": "~2.2.0",
+    "express": "^4.14.1",
+    "filesystem": "^1.0.1",
+    "forever": "^0.15.3",
+    "jsonwebtoken": "^7.2.1",
+    "mongodb": "^2.2.19",
+    "mongoose": "^4.8.0",
+    "monk": "^1.0.1",
+    "morgan": "^1.5.3",
+    "pug": "^2.0.0-beta6",
+    "serve-favicon": "~2.2.1"
+  }
 }
