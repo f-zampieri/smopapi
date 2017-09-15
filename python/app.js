@@ -1,13 +1,8 @@
-/* Task Task1 was posted by alexshukhman on Thu Aug 17 2017. Task1 has defined the task as such:
-This is the first task, everything is already done for you.
+/* Task Buy Me Pizza was posted by alexshukhman on Sun Aug 27 2017. Buy Me Pizza has defined the task as such:
+Medium is $10, pepperoni topping $1, spinach -$10, sausage $100, Large $15
 Good Luck. */
-function a(a1, a2) { // sanity test
-	return a1 + a2;
-}
-var b = (b1) => { // different function format
-	return b1 * 3;
-}
-var c = (c1) => { // recursive
-	if (c1 === Math.pow(c1, 2)) return c1;
-	else return c(c1 - 1);
+//this is where you edit your info
+
+function Cost(a,b){
+    return a
 }

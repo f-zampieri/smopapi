@@ -1,17 +1,2 @@
-// comment
-non commented
-function comment trying to trip regex
-a (comment trying to trip regex) returns 'foo';
-
-// sanity test using strings
-function a ('a', 'b') returns 'ab';
-
-// sanity test using numbers
-function a (1,2) returns 3;
-
-// trying different function format
-function b (3) returns 9;
-
-// trying recursive
-function c (3) returns 1;
-function c (6) returns 1;
+//this is where you edit your info
+function Cost(5, 7) returns 12;

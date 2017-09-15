@@ -10,6 +10,7 @@ var morgan = require('morgan');
 var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
+var Testuser = require('./api/models/testuser') // get mongoose model
 var User = require('./api/models/user'); // get mongoose model
 var UserInfo = require('./api/models/userinfo'); // get mongoose model
 var Task = require('./api/models/task'); // get mongoose model
@@ -54,6 +55,22 @@ app.post('/newuser', function (req, res) {
 			res.json({
 				success: true
 			});
+		});
+	});
+});
+app.post('/newuser_test', function (req, res) {
+	// create a user
+	var nick = new Testuser({
+		name: req.body.name
+		, password: req.body.password
+		, salt: req.body.salt
+	});
+	// save the sample user
+	nick.save(function (err) {
+		if (err) throw err;
+		console.log('User saved successfully');
+		res.json({
+			success: true
 		});
 	});
 });
@@ -103,6 +120,43 @@ apiRoutes.post('/authenticate', function (req, res) {
 					success: true
 					, message: 'Enjoy your token!'
 					, token: token
+				});
+			}
+		}
+	});
+});
+apiRoutes.post('/authenticate_test', function (req, res) {
+	// find the user
+	Testuser.findOne({
+		name: req.body.name
+	}, function (err, user) {
+		if (err) throw err;
+		if (!user) {
+			res.json({
+				success: false
+				, message: 'Authentication failed. User not found.'
+			});
+		}
+		else if (user) {
+			// check if password matches
+			var hash = crypto.createHmac('sha512', user.salt);
+			hash.update(req.body.password);
+			var value = hash.digest('hex');
+			if (user.password != value) {
+				res.json({
+					success: false
+					, message: 'Authentication failed. Wrong password.'
+				});
+			}
+			else {
+				// if user is found and password is right
+				// create a token
+				var token = jwt.sign(user, app.get('superSecret'), {
+					expiresIn: 1440 * 60 // expires in 24 hours
+				});
+				// return the information including token as JSON
+				res.json({
+					success: true
 				});
 			}
 		}
@@ -482,5 +536,5 @@ app.on('uncaughtException', function (err) {
 });
 // start the server ======
 // =======================
-app.listen(port);
+app.listen(port, "0.0.0.0");
 console.log('Magic happens at http://localhost:' + port);
