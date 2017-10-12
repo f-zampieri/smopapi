@@ -5,7 +5,7 @@
 	, "main": "api.js"
 	, "scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
-		, "start": "node api.js"
+		, "start": "node api.js > outputlog.txt > errorlog.txt " // REDIRECTION, >> is append
 		, "forever": "forever -m 5 -t api.js"
 		, "kill": "forever stop"
 	}
