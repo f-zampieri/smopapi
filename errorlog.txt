@@ -1,0 +1,27 @@
+events.js:141
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: connection timeout
+    at null.<anonymous> (/Users/alexshukhman/Sites/smopapi/node_modules/mongoose/lib/drivers/node-mongodb-native/connection.js:169:17)
+    at emitTwo (events.js:87:13)
+    at emit (events.js:172:7)
+    at listener (/Users/alexshukhman/Sites/smopapi/node_modules/mongoose/node_modules/mongodb/lib/db.js:1798:14)
+    at emitOne (events.js:77:13)
+    at emit (events.js:169:7)
+    at null.<anonymous> (/Users/alexshukhman/Sites/smopapi/node_modules/mongoose/node_modules/mongodb/lib/server.js:274:14)
+    at emitOne (events.js:77:13)
+    at emit (events.js:169:7)
+    at null.<anonymous> (/Users/alexshukhman/Sites/smopapi/node_modules/mongodb-core/lib/topologies/server.js:335:12)
+    at emitOne (events.js:77:13)
+    at emit (events.js:169:7)
+    at null.<anonymous> (/Users/alexshukhman/Sites/smopapi/node_modules/mongodb-core/lib/connection/pool.js:270:12)
+    at g (events.js:260:16)
+    at emitTwo (events.js:87:13)
+    at emit (events.js:172:7)
+    at Socket.<anonymous> (/Users/alexshukhman/Sites/smopapi/node_modules/mongodb-core/lib/connection/connection.js:185:10)
+    at Socket.g (events.js:260:16)
+    at emitNone (events.js:67:13)
+    at Socket.emit (events.js:166:7)
+    at Socket._onTimeout (net.js:332:8)
+    at _runOnTimeout (timers.js:524:11)
