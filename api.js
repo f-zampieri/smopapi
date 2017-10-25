@@ -8,6 +8,8 @@ var crypto = require('crypto');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
+var nodemailer = require('nodemailer');
+var mailerCreds = require('./api/credentials/mailerCreds')
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var Testuser = require('./api/models/testuser') // get mongoose model
@@ -34,6 +36,25 @@ app.use(morgan('dev'));
 // routes ================
 // =======================
 // create user
+var transporter = nodemailer.createTransport({
+	service: 'gmail'
+	, auth: {
+		user: mailerCreds.user
+		, pass: mailerCreds.pass
+	}
+});
+app.post('/sendVerificationMail', function (req, res) {
+	var mailBody = {
+		from: 'noreply@smop.io'
+		, to: req.body.email
+		, subject: 'Testing...'
+		, text: 'TestText'
+	}
+	transporter.sendMail(mailBody, (err, result) => {
+		if (!err) res.json(result);
+		else res.json(err);
+	});
+});
 app.post('/newuser', function (req, res) {
 	// create a user
 	var nick = new User({
