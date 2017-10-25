@@ -1,2 +1,0 @@
-Magic happens at http://localhost:3001
-[0mPOST /sendVerificationMail [32m200 [0m1814.224 ms - 283[0m

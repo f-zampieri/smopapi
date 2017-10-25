@@ -3,3 +3,5 @@
 # logs
 *.log
 .git
+outputlog.txt
+errorlog.txt
